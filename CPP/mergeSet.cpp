@@ -42,15 +42,16 @@ public:
 		for(int i = 0;i < len; ++i)
 			this->father[i] = i;
 	}
-	void merge(const int l, const int r) {
+	bool merge(const int l, const int r) {
 		auto x = this->find(l);
 		auto y = this->find(r);
 		if(x == y)
-			return;
+			return true;
 		if(this->rank[x] < this->rank[y])
 			std::swap(x, y);
 		this->rank[x] += this->rank[y];
 		this->father[y] = x;
+		return false;
 	}
 	std::unordered_map<int,  std::vector<int> > getCluster() {
 		std::unordered_map<int, std::vector<int> > res;
@@ -64,14 +65,17 @@ public:
 };
 
 int main() {
+	freopen("./gragh(2).txt", "r", stdin);
 	mergeSet one(10);
-	one.merge(0, 1);
-	one.merge(2, 3);
-	one.merge(4, 4);
-	one.merge(0, 7);
-	auto res = one.getCluster();
-	for(const auto& it : res) {
-		print(it.second);
+	int len, l , r, i;
+	std::cin >> len;
+	for(i = 0;i < len; ++i) {
+		std::cin >> l >> r;
+		if(l == r)
+			continue;
+		if(one.merge(l, r))
+			break;
 	}
+	printf(i == len ? "不存在环\n" : "检测到环\n");
 	return 0;
 }
