@@ -37,6 +37,11 @@ private:
 	mapGragh(const mapGragh&) = delete;
 	mapGragh(mapGragh&&) = delete;
 
+	/*
+		1. 如果一个点 color = 2, 说明这个点的后续点都搜索完了, 后面的点没机会在这个点产生回路
+		2. 如果后面的节点，发现一个节点 color = 1, 不是 2, 说明这个点搜索过
+		3. 重要的是，这个点（以及后续节点）还没搜索完....... 回路
+	*/
 	void dfs(const int u) {
 		this->color[u] = 1;
 		for(int i = 0;i < this->len; ++i) {
