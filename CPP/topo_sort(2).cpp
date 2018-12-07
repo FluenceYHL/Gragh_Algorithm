@@ -27,13 +27,23 @@ namespace {
 }
 
 class mapGragh {
+	struct Edge {
+		int to, next, value;
+		Edge(const int _to, const int _next, const int _value = 1) 
+			: to(_to), next(_next), value(_value)
+		{}
+	};
 private:
 	int len;
-	std::vector< std::vector<int> > maps;
+	int edge_cnt = -1;
+	std::vector< Edge> edges;
+	std::vector<int> head;
+
 	std::vector<int> indegree;
 	std::vector<bool> exist;
 	std::vector<int> color;
 	std::vector<int> sequence;
+
 	mapGragh(const mapGragh&) = delete;
 	mapGragh(mapGragh&&) = delete;
 
@@ -44,8 +54,9 @@ private:
 	*/
 	void dfs(const int u) {
 		this->color[u] = 1;
-		for(const auto v : this->maps[u]) {
-			if(this->color[v] == 0)
+		for(int k = head[u];k not_eq -1;k = this->edges[k].next) {
+			auto v = this->edges[k].to;
+			if(this->color[v] == 0) 
 				dfs(v);
 			else if(this->color[v] == 1)
 				logCall("检测到环");
@@ -57,17 +68,19 @@ private:
 public:
 	mapGragh(const int _len) 
 		: len(_len) {
+		this->head.assign(this->len, -1);
 		this->indegree.assign(this->len, 0);
 		this->color.assign(this->len, 0);
 		this->exist.assign(this->len, false);
-		this->maps.assign(this->len, std::vector<int>());
 	}
 
-	void addEdge(const int l, const int r) {
+	void addEdge(const int l, const int r, const int value = 1) {
 		assert(0 <= l and l < len and 0 <= r and r < len);
-		this->maps[l].emplace_back(r);
 		++this->indegree[r];
 		this->exist[l] = this->exist[r] = true;
+
+		this->edges.emplace_back(r, this->head[l]);
+		this->head[l] = ++this->edge_cnt;
 	}
 
 	void search() {
@@ -87,9 +100,11 @@ public:
 		while(!Q.empty()) {
 			auto u = Q.front();
 			Q.pop();
-			for(const auto v : this->maps[u]) 
+			for(int k = head[u];k not_eq -1;k = this->edges[k].next) {
+				auto v = this->edges[k].to;
 				if(--this->indegree[v] == 0)
 					Q.push(v), ++cnt;
+			}
 		}
 		printf(cnt == this->len ? "不存在环\n" : "检测到环\n");
 	}
@@ -97,13 +112,14 @@ public:
 
 int main() {
 	mapGragh one(10);
-	freopen("./gragh(2).txt", "r", stdin);
+	freopen("./gragh(1).txt", "r", stdin);
 	int len, l , r;
 	std::cin >> len;
 	for(int i = 0;i < len; ++i) {
 		std::cin >> l >> r;
 		one.addEdge(l, r);
 	}
-	one.search();
+	// one.search();
+	one.topo_sort();
 	return 0;
 }
