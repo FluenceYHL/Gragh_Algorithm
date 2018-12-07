@@ -1,11 +1,11 @@
 /*********************************************************************************
   *Copyright(C),Your Company
-  *FileName:     resouce_allocate_gragh.cpp
+  *FileName:     mergeSet.cpp
   *Author:       刘畅
   *Version:      1.0
   *Date:         2018.12.6
   *Description:  资源分配图算法模拟
-  *Compile:      g++ -std=c++14 resouce_allocate_gragh.cpp -o gragh -lpthread
+  *Compile:      g++ -std=c++14 mergeSet.cpp -o gragh -lpthread
   *Function List:  
   *History:  
 **********************************************************************************/
@@ -38,11 +38,13 @@ private:
 	}
 public:
 	mergeSet(const int _len) 
-		: len(_len), father(len, 0), rank(len, 1) {
+		: len(_len){
+		this->father.assign(len, 0);
+		this->rank.assign(len, 1);
 		for(int i = 0;i < len; ++i)
 			this->father[i] = i;
 	}
-	bool merge(const int l, const int r) {
+	bool merge(const int l, const int r) {  // 坐标不合法的工作交给外面
 		auto x = this->find(l);
 		auto y = this->find(r);
 		if(x == y)
@@ -66,9 +68,9 @@ public:
 
 int main() {
 	freopen("./gragh(2).txt", "r", stdin);
-	mergeSet one(10);
 	int len, l , r, i;
 	std::cin >> len;
+	mergeSet one(10);
 	for(i = 0;i < len; ++i) {
 		std::cin >> l >> r;
 		if(l == r)
