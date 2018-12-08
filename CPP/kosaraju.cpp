@@ -14,67 +14,69 @@
 #include <queue>
 #include <assert.h>
 
-using namespace std ;
-const int Max = 100 ;
-int n , m , start , end , k1 , k2 , ans , NO , index[Max] ;
-struct Node{
-	int end , next ;
-} Edge[Max] , Re_Edge[Max] ;
-int head[Max] ;
-int Re_head[Max] ;
-int book[Max] , color[Max] ;
-void Add_Edge( int start , int end ){
-	Edge[k1].end = end ;
-	Edge[k1].next = head[start] ;
-	head[start] = k1++ ;
-}
-void Re_Add_Edge( int start , int end ){
-	Re_Edge[k2].end = end ;
-	Re_Edge[k2].next = Re_head[start] ;
-	Re_head[start] = k2++ ;
-}
-void dfs( int cur ){
-	book[cur] = 1 ;
-	for( int i = head[cur] ; i != -1 ; i = Edge[i].next ){
-		int v = Edge[i].end ;
-		if( book[v] == 0 )
-			dfs( v ) ;
+// 算法很巧妙, 见博客 https://www.cnblogs.com/nullzx/p/6437926.html
+class Kosaraju {
+private:
+	int len;
+	int cnt;
+	std::vector<int> visited;
+	std::vector<int> color;
+	std::vector<int> exist;
+	std::vector< std::vector<int> > maps;
+	std::vector< std::vector<int> > re_maps;
+	std::list<int> sequence;
+
+	void re_dfs(const int u) {
+		visited[u] = 1;
+		for(const auto& v : this->re_maps[u]) 
+			if(visited[v] == 0)
+				this->re_dfs(v);
+		this->sequence.push_front(u);
 	}
-	index[ ++NO ] = cur ;
-}
-void Re_dfs( int cur ){
-	color[cur] = ans ;
-	cout << cur << " " ;
-	for(int i = Re_head[cur] ; i != -1 ; i = Re_Edge[i].next ){
-		int v = Re_Edge[i].end ;
-		if( color[v] == 0 )
-			Re_dfs( v ) ;
+
+	void dfs(const int u) {
+		color[u] = cnt;
+		for(const auto v : this->maps[u])
+			if(color[v] == 0)
+				this->dfs(v);
+		std::cout << u << "  ";
 	}
-}
-void Kosaraju(){
-	for(int i = 1 ; i <= n ; ++i )
-		if( book[i] == 0 )
-			dfs( i ) ;
-	for(int i = NO ; i >= 1 ; --i ){
-		int v = index[i] ;
-		if( color[v] == 0 ){
-			ans ++ ;
-			cout << "NO." << ans << "  {  " ;
-			Re_dfs( v ) ;
-			cout << " }" << endl ;
+public:
+	Kosaraju(const int _len) 
+		: len(_len), visited(_len, 0), color(_len, 0), exist(_len, 0),
+		  maps(_len, std::vector<int>()), re_maps(_len, std::vector<int>())
+	{}
+
+	void search() {
+		for(int i = 0;i < len; ++i)
+			if(exist[i] and visited[i] == 0)
+				this->re_dfs(i);
+		for(const auto u : this->sequence) {
+			if(color[u] == 0) {
+				++cnt;
+				std::cout << "NO." << cnt << " { ";
+				this->dfs(u);
+				std::cout << " }\n";
+			}
 		}
 	}
-}
-int main(){
-	cin >> n >> m ;
-	k1 = k2 = 1 ;
-	memset( head , -1 , sizeof( head ) ) ;
-	memset( Re_head , -1 , sizeof( Re_head ) ) ;
-	for(int i = 1 ; i <= m ; ++i ){
-		cin >> start >> end ;
-		Add_Edge( start , end ) ;
-		Re_Add_Edge( end , start ) ;
+
+	void addEdge(const int l, const int r) {
+		this->maps[l].emplace_back(r);
+		this->re_maps[r].emplace_back(l);
+		this->exist[l] = this->exist[r] = 1;
 	}
-	Kosaraju() ;
-	return 0 ;
+};
+
+int main() {
+	Kosaraju one(10);
+	freopen("./gragh(1).txt", "r", stdin);
+	int len, l , r;
+	std::cin >> len;
+	for(int i = 0;i < len; ++i) {
+		std::cin >> l >> r;
+		one.addEdge(l, r);
+	}
+	one.search();
+	return 0;
 }

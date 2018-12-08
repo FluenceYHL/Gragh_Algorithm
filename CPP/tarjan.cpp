@@ -25,6 +25,7 @@ private:
 	std::vector<int> low;
 	std::vector<int> color;
 	std::vector<int> sequence;
+	std::vector<int> exist;
 
 	std::unordered_map<int, std::vector<int> > clusters;
 
@@ -54,8 +55,8 @@ private:
 				auto top = sequence.back();
 				sequence.pop_back();
 				color[top] = cnt;
-				std::cout << top << "  ";
 				this->clusters[u].emplace_back(top);
+				std::cout << top << "  ";
 				if(top == u)
 					break;
 			}
@@ -64,14 +65,14 @@ private:
 	}
 public:
 	Tarjan(const int _len) 
-		: len(_len), dfn(_len, 0), low(_len, 0), color(_len, 0), 
+		: len(_len), dfn(_len, 0), low(_len, 0), color(_len, 0), exist(_len, 0),
 		  maps(_len, std::vector<int>()) // 千万不可以用 len
 	{}
 
 	std::unordered_map<int, std::vector<int> > search() {
 		this->clear();
 		for(int i = 0;i < len; ++i) 
-			if(dfn[i] == 0)
+			if(exist[i] and dfn[i] == 0)
 				tarjan(i);
 		return this->clusters;
 	}
@@ -79,6 +80,7 @@ public:
 	void addEdge(const int l, const int r) {
 		assert(0 <= l and l < len and 0 <= r and r < len);
 		maps[l].emplace_back(r);
+		exist[l] = exist[r] = 1;
 	}
 };
 
