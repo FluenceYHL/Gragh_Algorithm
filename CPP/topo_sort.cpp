@@ -26,40 +26,18 @@ namespace {
 	}
 }
 
-class mapGragh {
+class topoSort {
 private:
 	int len;
 	std::vector< std::vector<int> > maps;
 	std::vector<int> indegree;
-	std::vector<bool> exist;
-	std::vector<int> color;
-	std::vector<int> sequence;
-	mapGragh(const mapGragh&) = delete;
-	mapGragh(mapGragh&&) = delete;
-
-	/*
-		1. 如果一个点 color = 2, 说明这个点的后续点都搜索完了, 后面的点没机会在这个点产生回路
-		2. 如果后面的节点，发现一个节点 color = 1, 不是 2, 说明这个点搜索过
-		3. 重要的是，这个点（以及后续节点）还没搜索完....... 回路
-	*/
-	void dfs(const int u) {
-		this->color[u] = 1;
-		for(const auto v : this->maps[u]) {
-			if(this->color[v] == 0)
-				dfs(v);
-			else if(this->color[v] == 1)
-				logCall("检测到环");
-		}
-		this->color[u] = 2;
-		this->sequence.emplace(this->sequence.begin(), u);
-	}
+	topoSort(const topoSort&) = delete;
+	topoSort(topoSort&&) = delete;
 
 public:
-	mapGragh(const int _len) 
+	topoSort(const int _len) 
 		: len(_len) {
 		this->indegree.assign(this->len, 0);
-		this->color.assign(this->len, 0);
-		this->exist.assign(this->len, false);
 		this->maps.assign(this->len, std::vector<int>());
 	}
 
@@ -67,15 +45,6 @@ public:
 		assert(0 <= l and l < len and 0 <= r and r < len);
 		this->maps[l].emplace_back(r);
 		++this->indegree[r];
-		this->exist[l] = this->exist[r] = true;
-	}
-
-	void search() {
-		this->sequence.clear();
-		for(int i = 0;i < this->len; ++i) 
-			if(this->exist[i] and color[i] == 0)
-				this->dfs(i);
-		print(this->sequence);
 	}
 
 	void topo_sort() {
@@ -95,8 +64,68 @@ public:
 	}
 };
 
+class dfs_circle {
+private:
+	int len;
+	std::vector< std::vector<int> > maps;
+	std::vector<bool> exist;
+	std::vector<int> color;
+	std::vector<int> sequence;
+	dfs_circle(const dfs_circle&) = delete;
+	dfs_circle(dfs_circle&&) = delete;
+
+	/*
+		1. 如果一个点 color = 2, 说明这个点的后续点都搜索完了, 后面的点没机会在这个点产生回路
+		2. 如果后面的节点，发现一个节点 color = 1, 不是 2, 说明这个点搜索过
+		3. 重要的是，这个点（以及后续节点）还没搜索完....... 回路
+	*/
+	void dfs(const int u) {
+		this->color[u] = 1;
+		for(const auto v : this->maps[u]) {
+			if(this->color[v] == 0)
+				dfs(v);
+			else if(this->color[v] == 1)
+				logCall("检测到环");
+		}
+		this->color[u] = 2;
+		this->sequence.emplace(this->sequence.begin(), u);
+	}
+
+public:
+	dfs_circle(const int _len) 
+		: len(_len) {
+		this->color.assign(this->len, 0);
+		this->exist.assign(this->len, false);
+		this->maps.assign(this->len, std::vector<int>());
+	}
+
+	void addEdge(const int l, const int r) {
+		assert(0 <= l and l < len and 0 <= r and r < len);
+		this->maps[l].emplace_back(r);
+		this->exist[l] = this->exist[r] = true;
+	}
+
+	void search() {
+		this->sequence.clear();
+		for(int i = 0;i < this->len; ++i) 
+			if(this->exist[i] and color[i] == 0)
+				this->dfs(i);
+		print(this->sequence);
+	}
+};
+
 int main() {
-	mapGragh one(10);
+	// topoSort one(10);
+	// freopen("./gragh(2).txt", "r", stdin);
+	// int len, l , r;
+	// std::cin >> len;
+	// for(int i = 0;i < len; ++i) {
+	// 	std::cin >> l >> r;
+	// 	one.addEdge(l, r);
+	// }
+	// one.topo_sort();
+
+	topoSort one(10);
 	freopen("./gragh(2).txt", "r", stdin);
 	int len, l , r;
 	std::cin >> len;
@@ -104,6 +133,6 @@ int main() {
 		std::cin >> l >> r;
 		one.addEdge(l, r);
 	}
-	one.search();
+	one.topo_sort();
 	return 0;
 }
